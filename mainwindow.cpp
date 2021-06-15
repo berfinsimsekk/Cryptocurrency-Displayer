@@ -1,4 +1,3 @@
-
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -12,8 +11,7 @@ int numberOfLines=0;
 QStringList coinName; // tells the coinName index by index. For example, coinName[0] gives name of the coin at 0th row.
 QTableWidget *table;
 int row=0;
-
-QString path=qgetenv("MYCRYPTOCONVERT"); // reads the environment variable
+QString WholeList;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -22,14 +20,47 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     manager = new QNetworkAccessManager(this) ;
 
+    QString path=qgetenv("MYCRYPTOCONVERT"); // reads the environment variable
 
-
-    connect(manager, SIGNAL(finished(QNetworkReply*)),this, SLOT(getWholeList(QNetworkReply*)));
-    manager->get(QNetworkRequest(QUrl("https://api.coingecko.com/api/v3/coins/list")));
-
+    QNetworkAccessManager* manager2=new QNetworkAccessManager(this);
+     connect(manager2, SIGNAL(finished(QNetworkReply*)),this, SLOT(getWholeList(QNetworkReply*)));
+    manager2->get(QNetworkRequest(QUrl("https://api.coingecko.com/api/v3/coins/list")));
 
     // reads the input file to know numberOfLines in the file.
 
+       QFile inputFile(path);
+       if (inputFile.open(QIODevice::ReadOnly))
+       {
+          QTextStream in(&inputFile);
+          while (!in.atEnd())
+          {
+             QString line = in.readLine(); // the get current line.
+
+             QString pattern = "\"symbol\":\""+line+"\",\"name\":\"(.*)\"";
+                       QString pattern2 = "\"symbol\":\"(.*)\",\"name\":\""  +line+  "\"";
+
+                       QRegExp rx(pattern);
+                       if ( rx.indexIn(line, 0) != -1 ) {
+                           line=rx.cap(2);
+                       }
+                       QRegExp rx2(pattern2);
+                       if( rx2.indexIn(line,0)!=-1){
+                           line=rx2.cap(2);
+                       }
+
+
+             coinName.append(line); // add the name of the coin into string array
+             numberOfLines++; // increase the numberOfLines by 1
+          }
+          QString line = in.readLine(); // the get current line.
+          coinName.append(line); // add the name of the coin into string array
+          numberOfLines++; // increase the numberOfLines by 1
+
+       }
+
+
+
+       inputFile.close();
 
 
        table = new QTableWidget(this); // create the table
@@ -43,9 +74,8 @@ MainWindow::MainWindow(QWidget *parent) :
        this->setCentralWidget(table);
 
 
-       connect(manager, SIGNAL(finished(QNetworkReply*)),this, SLOT(TableWidgetDisplay(QNetworkReply*)));
-       manager->get(QNetworkRequest(QUrl("https://api.coingecko.com/api/v3/simple/price?ids="+coinName[0]+"&vs_currencies=usd,eur,gbp")));
-
+ connect(manager, SIGNAL(finished(QNetworkReply*)),this, SLOT(TableWidgetDisplay(QNetworkReply*)));
+ manager->get(QNetworkRequest(QUrl("https://api.coingecko.com/api/v3/simple/price?ids="+coinName[0]+"&vs_currencies=usd,eur,gbp")));
 
 }
 
@@ -55,37 +85,10 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void getWholeList(QNetworkReply *reply){
-
-    QString data = (QString) reply->readAll();
-
-    QFile inputFile(path);
-    if (inputFile.open(QIODevice::ReadOnly))
-    {
-       QTextStream in(&inputFile);
-       while (!in.atEnd())
-       {
-          QString line = in.readLine(); // the get current line.
-
-
-          QRegExp rx("\"symbol\":\"(.*)\",\"name\":\"(.*)\"\"");
-          if ( rx.indexIn(line, 0) != -1 ) {
-              line=rx.cap(2);
-          }
-
-
-          coinName.append(line); // add the name of the coin into string array
-          numberOfLines++; // increase the numberOfLines by 1
-       }
-       QString line = in.readLine(); // the get current line.
-       coinName.append(line); // add the name of the coin into string array
-       numberOfLines++; // increase the numberOfLines by 1
-
-    }
-
-    inputFile.close();
-
+void MainWindow::getWholeList(QNetworkReply *reply){
+    WholeList=(QString) reply->readAll();
 }
+
 
 // every time this slot is triggered, a new row will be created.
 void MainWindow::TableWidgetDisplay(QNetworkReply *reply){
@@ -120,7 +123,7 @@ void MainWindow::TableWidgetDisplay(QNetworkReply *reply){
             }
 
             else{
-                item->setText(coinName[3]); // pattern could not be found.
+                item->setText("Error"); // pattern could not be found.
             }
 
             table->setItem(row,column,item); // adds the table correspoding numerical value of USD,EUR or GDP value
