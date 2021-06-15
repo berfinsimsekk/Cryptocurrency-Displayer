@@ -13,7 +13,10 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     manager = new QNetworkAccessManager(this) ;
-    QString path=qgetenv("MYCRYPTOCONVERT");
+
+    QString path=qgetenv("MYCRYPTOCONVERT"); // reads the environment variable
+
+    // reads the input file to know numberOfLines in the file.
     QFile inputFile(path);
     if (inputFile.open(QIODevice::ReadOnly))
     {
