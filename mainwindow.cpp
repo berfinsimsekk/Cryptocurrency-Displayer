@@ -1,3 +1,4 @@
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -12,6 +13,8 @@ QStringList coinName; // tells the coinName index by index. For example, coinNam
 QTableWidget *table;
 int row=0;
 
+QString path=qgetenv("MYCRYPTOCONVERT"); // reads the environment variable
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -20,36 +23,13 @@ MainWindow::MainWindow(QWidget *parent) :
     manager = new QNetworkAccessManager(this) ;
 
 
-    QString path=qgetenv("MYCRYPTOCONVERT"); // reads the environment variable
+
+    connect(manager, SIGNAL(finished(QNetworkReply*)),this, SLOT(getWholeList(QNetworkReply*)));
+    manager->get(QNetworkRequest(QUrl("https://api.coingecko.com/api/v3/coins/list")));
 
 
     // reads the input file to know numberOfLines in the file.
-       QFile inputFile(path);
-       if (inputFile.open(QIODevice::ReadOnly))
-       {
-          QTextStream in(&inputFile);
-          while (!in.atEnd())
-          {
-             QString line = in.readLine(); // the get current line.
 
-             QRegExp rx("\"symbol\":\"(.*)\",\"name\":\"(.*)\"");
-             if ( rx.indexIn(line, 0) != -1 ) {
-                 line=rx.cap(2);
-             }
-
-
-             coinName.append(line); // add the name of the coin into string array
-             numberOfLines++; // increase the numberOfLines by 1
-          }
-          QString line = in.readLine(); // the get current line.
-          coinName.append(line); // add the name of the coin into string array
-          numberOfLines++; // increase the numberOfLines by 1
-
-       }
-
-
-
-       inputFile.close();
 
 
        table = new QTableWidget(this); // create the table
@@ -73,6 +53,38 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void getWholeList(QNetworkReply *reply){
+
+    QString data = (QString) reply->readAll();
+
+    QFile inputFile(path);
+    if (inputFile.open(QIODevice::ReadOnly))
+    {
+       QTextStream in(&inputFile);
+       while (!in.atEnd())
+       {
+          QString line = in.readLine(); // the get current line.
+
+
+          QRegExp rx("\"symbol\":\"(.*)\",\"name\":\"(.*)\"\"");
+          if ( rx.indexIn(line, 0) != -1 ) {
+              line=rx.cap(2);
+          }
+
+
+          coinName.append(line); // add the name of the coin into string array
+          numberOfLines++; // increase the numberOfLines by 1
+       }
+       QString line = in.readLine(); // the get current line.
+       coinName.append(line); // add the name of the coin into string array
+       numberOfLines++; // increase the numberOfLines by 1
+
+    }
+
+    inputFile.close();
+
 }
 
 // every time this slot is triggered, a new row will be created.
