@@ -6,6 +6,7 @@
 #include <QRegExp>
 #include <QFile>
 #include <QStringList>
+#include <QVariant>
 
 int numberOfLines=0;
 QStringList coinName; // tells the coinName index by index. For example, coinName[0] gives name of the coin at 0th row.
@@ -81,7 +82,10 @@ void MainWindow::getWholeList(QNetworkReply *reply){
        table->setHorizontalHeaderLabels(first);
        table->verticalHeader()->hide();
        this->setCentralWidget(table);
-
+       this->centralWidget()->size();
+       this->resize((double)150.5*4,(double)45*numberOfLines); // 45*numberOfLines
+       table->QAbstractItemView::setEditTriggers(QAbstractItemView::NoEditTriggers); // cell cannot be modified
+       table->setFocusPolicy(Qt::NoFocus); // no blue highlight when cell clicked.
 
  connect(manager, SIGNAL(finished(QNetworkReply*)),this, SLOT(TableWidgetDisplay(QNetworkReply*)));
  manager->get(QNetworkRequest(QUrl("https://api.coingecko.com/api/v3/simple/price?ids="+coinName[0]+"&vs_currencies=usd,eur,gbp")));
@@ -116,12 +120,11 @@ void MainWindow::TableWidgetDisplay(QNetworkReply *reply){
             if ( rx.indexIn(data, pos) != -1 ) {
                 // given the data, try to match it with rx pattern, starting searching from pos index.
                 // if it finds it successfully, rx.cap(1) gives USD, rx.cap(2) gives EUR, rx.cap(3) gives GBP
-
                item->setText(rx.cap(column)); // sets correspoding numerical value of USD,EUR or GDP value.
             }
 
             else{
-                item->setText("Error"); // pattern could not be found.
+                item->setText( QVariant(table->size().height()).toString() ); // pattern could not be found.
             }
 
             table->setItem(row,column,item); // adds the table correspoding numerical value of USD,EUR or GDP value
@@ -129,7 +132,9 @@ void MainWindow::TableWidgetDisplay(QNetworkReply *reply){
         }
 
 
-
     row++;
-    if(row<coinName.size()-1) manager->get(QNetworkRequest(QUrl("https://api.coingecko.com/api/v3/simple/price?ids="+coinName[row]+"&vs_currencies=usd,eur,gbp")));
+    if(row<coinName.size()-1) {
+        manager->get(QNetworkRequest(QUrl("https://api.coingecko.com/api/v3/simple/price?ids="+coinName[row]+"&vs_currencies=usd,eur,gbp")));
+    }
+
 }
