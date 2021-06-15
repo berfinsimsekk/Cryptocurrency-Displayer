@@ -16,6 +16,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     manager = new QNetworkAccessManager(this) ;
 
+
+
     QString path=qgetenv("MYCRYPTOCONVERT"); // reads the environment variable
 
     // reads the input file to know numberOfLines in the file.
@@ -26,6 +28,8 @@ MainWindow::MainWindow(QWidget *parent) :
        while (!in.atEnd())
        {
           QString line = in.readLine();
+          connect(manager, SIGNAL(finished(QNetworkReply*)),this, SLOT(TableWidgetDisplay(QNetworkReply*)));
+          manager->get(QNetworkRequest(QUrl("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,gbp")));
           coinName.append(line);
           numberOfLines++;
        }
@@ -33,8 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
 
-    connect(manager, SIGNAL(finished(QNetworkReply *)),this, SLOT(TableWidgetDisplay(QNetworkReply*)));
-    manager->get(QNetworkRequest(QUrl("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,gbp")));
+
 }
 
 
@@ -79,6 +82,8 @@ void MainWindow::TableWidgetDisplay(QNetworkReply *reply){
         }
 
     }
+    disconnect(this,0,0,0);
+    disconnect(manager,0,0,0);
     table->verticalHeader()->hide();
     this->setCentralWidget(table);
 
