@@ -31,6 +31,13 @@ MainWindow::MainWindow(QWidget *parent) :
           while (!in.atEnd())
           {
              QString line = in.readLine(); // the get current line.
+
+             QRegExp rx("\"symbol\":\"(.*)\",\"name\":\"(.*)\"");
+             if ( rx.indexIn(line, 0) != -1 ) {
+                 line=rx.cap(2);
+             }
+
+
              coinName.append(line); // add the name of the coin into string array
              numberOfLines++; // increase the numberOfLines by 1
           }
@@ -111,5 +118,5 @@ void MainWindow::TableWidgetDisplay(QNetworkReply *reply){
 
 
     row++;
-    if(row<numberOfLines-1) manager->get(QNetworkRequest(QUrl("https://api.coingecko.com/api/v3/simple/price?ids="+coinName[row]+"&vs_currencies=usd,eur,gbp")));
+    if(row<coinName.size()-1) manager->get(QNetworkRequest(QUrl("https://api.coingecko.com/api/v3/simple/price?ids="+coinName[row]+"&vs_currencies=usd,eur,gbp")));
 }
