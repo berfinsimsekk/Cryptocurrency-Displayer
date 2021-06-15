@@ -18,13 +18,26 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+
+    QNetworkAccessManager* manager2=new QNetworkAccessManager(this);
+    connect(manager2, SIGNAL(finished(QNetworkReply*)),this, SLOT(getWholeList(QNetworkReply*)));
+    manager2->get(QNetworkRequest(QUrl("https://api.coingecko.com/api/v3/coins/list")));
+
+}
+
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+
+void MainWindow::getWholeList(QNetworkReply *reply){
+    WholeList=(QString) reply->readAll();
+
     manager = new QNetworkAccessManager(this) ;
 
     QString path=qgetenv("MYCRYPTOCONVERT"); // reads the environment variable
-
-    QNetworkAccessManager* manager2=new QNetworkAccessManager(this);
-     connect(manager2, SIGNAL(finished(QNetworkReply*)),this, SLOT(getWholeList(QNetworkReply*)));
-    manager2->get(QNetworkRequest(QUrl("https://api.coingecko.com/api/v3/coins/list")));
 
     // reads the input file to know numberOfLines in the file.
 
@@ -35,17 +48,11 @@ MainWindow::MainWindow(QWidget *parent) :
           while (!in.atEnd())
           {
              QString line = in.readLine(); // the get current line.
-
-             QString pattern = "\"symbol\":\""+line+"\",\"name\":\"(.*)\"";
-                       QString pattern2 = "\"symbol\":\"(.*)\",\"name\":\""  +line+  "\"";
+             QString pattern = "\"symbol\":\"" + line + "\"," + "\"name\":" + "\"(.*)\"}";
 
                        QRegExp rx(pattern);
                        if ( rx.indexIn(WholeList, 0) != -1 ) {
-                           line=rx.cap(2);
-                       }
-                       QRegExp rx2(pattern2);
-                       if( rx2.indexIn(WholeList,0)!=-1){
-                           line=rx2.cap(2);
+                           line=rx.cap(1);
                        }
 
 
@@ -76,17 +83,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
  connect(manager, SIGNAL(finished(QNetworkReply*)),this, SLOT(TableWidgetDisplay(QNetworkReply*)));
  manager->get(QNetworkRequest(QUrl("https://api.coingecko.com/api/v3/simple/price?ids="+coinName[0]+"&vs_currencies=usd,eur,gbp")));
-
-}
-
-
-MainWindow::~MainWindow()
-{
-    delete ui;
-}
-
-void MainWindow::getWholeList(QNetworkReply *reply){
-    WholeList=(QString) reply->readAll();
 }
 
 
@@ -119,7 +115,7 @@ void MainWindow::TableWidgetDisplay(QNetworkReply *reply){
                 // given the data, try to match it with rx pattern, starting searching from pos index.
                 // if it finds it successfully, rx.cap(1) gives USD, rx.cap(2) gives EUR, rx.cap(3) gives GBP
 
-               item->setText(rx.cap(column)); // sets correspoding numerical value of USD,EUR or GDP value.
+               item->setText(WholeList); // sets correspoding numerical value of USD,EUR or GDP value.
             }
 
             else{
