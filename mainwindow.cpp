@@ -4,14 +4,29 @@
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QRegExp>
+#include <QFile>
 
-
+int numberOfLines=0;
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     manager = new QNetworkAccessManager(this) ;
+    QString path=qgetenv("MYCRYPTOCONVERT");
+    QFile inputFile(path);
+    if (inputFile.open(QIODevice::ReadOnly))
+    {
+       QTextStream in(&inputFile);
+       while (!in.atEnd())
+       {
+          QString line = in.readLine();
+          numberOfLines++;
+       }
+       inputFile.close();
+    }
+
+
     connect(manager, SIGNAL(finished(QNetworkReply *)),this, SLOT(TableWidgetDisplay(QNetworkReply*)));
     manager->get(QNetworkRequest(QUrl("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,gbp")));
 }
@@ -36,7 +51,7 @@ void MainWindow::TableWidgetDisplay(QNetworkReply *reply){
     QRegExp rx("\"usd\":(\\d+),\"eur\":(\\d+),\"gbp\":(\\d+)");
 
 
-    for(int row=0; row<4;row++){
+    for(int row=0; row<numberOfLines;row++){
         QTableWidgetItem *item;
         QTableWidgetItem *coin;
         coin = new QTableWidgetItem;
@@ -62,7 +77,3 @@ void MainWindow::TableWidgetDisplay(QNetworkReply *reply){
     this->setCentralWidget(table);
 
 }
-
-
-
-
