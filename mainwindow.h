@@ -6,6 +6,7 @@
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
 
+
 namespace Ui {
 class MainWindow;
 }
@@ -20,6 +21,7 @@ public:
 
 public slots:
      void TableWidgetDisplay(QNetworkReply * reply) ;
+     void getWholeList(QNetworkReply* reply);
 
 private:
     Ui::MainWindow *ui;
