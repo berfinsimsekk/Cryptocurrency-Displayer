@@ -5,8 +5,10 @@
 #include <QTableWidgetItem>
 #include <QRegExp>
 #include <QFile>
+#include <QStringList>
 
 int numberOfLines=0;
+QStringList coinName;
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -24,6 +26,7 @@ MainWindow::MainWindow(QWidget *parent) :
        while (!in.atEnd())
        {
           QString line = in.readLine();
+          coinName.append(line);
           numberOfLines++;
        }
        inputFile.close();
@@ -59,7 +62,7 @@ void MainWindow::TableWidgetDisplay(QNetworkReply *reply){
         QTableWidgetItem *coin;
         coin = new QTableWidgetItem;
         table->insertRow(row);
-        coin->setText("Bitcoin");
+        coin->setText(coinName[row]);
         table->setItem(row,0,coin);
 
         for(int column=1; column<4;column++){
