@@ -34,6 +34,9 @@ MainWindow::MainWindow(QWidget *parent) :
           coinName.append(line); // add the name of the coin into string array
           numberOfLines++; // increase the numberOfLines by 1
        }
+       QString line = in.readLine(); // the get current line.
+       coinName.append(line); // add the name of the coin into string array
+       numberOfLines++; // increase the numberOfLines by 1
        inputFile.close();
     }
 
