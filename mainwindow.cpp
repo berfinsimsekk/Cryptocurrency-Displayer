@@ -48,11 +48,13 @@ void MainWindow::getWholeList(QNetworkReply *reply){
           while (!in.atEnd())
           {
              QString line = in.readLine(); // the get current line.
-             QString pattern = "\"symbol\":\"" + line + "\"," + "\"name\":" + "\"(.*)\"}";
+             QString pattern = "\"symbol\":\"" +line+ "\",\"name\":\"(.+)\"\\},";
 
                        QRegExp rx(pattern);
                        if ( rx.indexIn(WholeList, 0) != -1 ) {
                            line=rx.cap(1);
+                           line=line.split("\"")[0];
+                           line.replace(" ","-");
                        }
 
 
@@ -115,7 +117,7 @@ void MainWindow::TableWidgetDisplay(QNetworkReply *reply){
                 // given the data, try to match it with rx pattern, starting searching from pos index.
                 // if it finds it successfully, rx.cap(1) gives USD, rx.cap(2) gives EUR, rx.cap(3) gives GBP
 
-               item->setText(WholeList); // sets correspoding numerical value of USD,EUR or GDP value.
+               item->setText(rx.cap(column)); // sets correspoding numerical value of USD,EUR or GDP value.
             }
 
             else{
