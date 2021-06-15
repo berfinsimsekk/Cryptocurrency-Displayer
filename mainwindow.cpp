@@ -3,6 +3,7 @@
 
 #include <QTableWidget>
 #include <QTableWidgetItem>
+#include <QRegExp>
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -10,7 +11,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    TableWidgetDisplay();
+    manager = new QNetworkAccessManager(this) ;
+    connect(manager, SIGNAL(finished(QNetworkReply *)),this, SLOT(TableWidgetDisplay(QNetworkReply*)));
+    manager->get(QNetworkRequest(QUrl("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,gbp")));
 }
 
 
@@ -19,28 +22,45 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::TableWidgetDisplay(){
+void MainWindow::TableWidgetDisplay(QNetworkReply *reply){
     QTableWidget *table = new QTableWidget(this);
-
     table->setColumnCount(4);
     QStringList first;
     first << " "<<"USD"<<"EUR"<<"GBP";
     table->setHorizontalHeaderLabels(first);
 
-    for(int column=0; column<4;column++){
+    // read the data fetched from the web site
+    QString data = (QString) reply->readAll();
+
+    // use pattern matching to extract the rate
+    QRegExp rx("\"usd\":(\\d+),\"eur\":(\\d+),\"gbp\":(\\d+)");
+
+
+    for(int row=0; row<4;row++){
         QTableWidgetItem *item;
-        table->insertRow(column);
+        QTableWidgetItem *coin;
+        coin = new QTableWidgetItem;
+        table->insertRow(row);
+        coin->setText("Bitcoin");
+        table->setItem(row,0,coin);
 
-        for(int row=0;row<5;row++){
+        for(int column=1; column<4;column++){
             item =new QTableWidgetItem;
-            item->setText("Bitcoin");
+            int pos=0;
+            if ( rx.indexIn(data, pos) != -1 ) {
+               item->setText(rx.cap(column));
+            }else{
+                item->setText("Error");
+            }
 
-            table->setItem(row,0,item);
+            table->setItem(row,column,item);
+
         }
 
     }
-
+    table->verticalHeader()->hide();
     this->setCentralWidget(table);
+
 }
 
 
