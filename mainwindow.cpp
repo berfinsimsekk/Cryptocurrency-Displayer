@@ -40,11 +40,11 @@ MainWindow::MainWindow(QWidget *parent) :
                        QString pattern2 = "\"symbol\":\"(.*)\",\"name\":\""  +line+  "\"";
 
                        QRegExp rx(pattern);
-                       if ( rx.indexIn(line, 0) != -1 ) {
+                       if ( rx.indexIn(WholeList, 0) != -1 ) {
                            line=rx.cap(2);
                        }
                        QRegExp rx2(pattern2);
-                       if( rx2.indexIn(line,0)!=-1){
+                       if( rx2.indexIn(WholeList,0)!=-1){
                            line=rx2.cap(2);
                        }
 
