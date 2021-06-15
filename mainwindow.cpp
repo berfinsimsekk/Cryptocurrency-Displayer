@@ -25,42 +25,37 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // reads the input file to know numberOfLines in the file.
     QFile inputFile(path);
+
     if (inputFile.open(QIODevice::ReadOnly))
     {
        QTextStream in(&inputFile);
-       while (!in.atEnd())
-       {
-          QString line = in.readLine(); // the get current line.
+       QString line;
+
+       do {
+          line = in.readLine(); // the get current line.
           coinName.append(line); // add the name of the coin into string array
           numberOfLines++; // increase the numberOfLines by 1
+       } while(!line.isNull());
+
+
        }
-       QString line = in.readLine(); // the get current line.
-       coinName.append(line); // add the name of the coin into string array
-       numberOfLines++; // increase the numberOfLines by 1
+
        inputFile.close();
-    }
 
 
-    table = new QTableWidget(this); // create the table
-    table->setColumnCount(4); // number of columns is always 4
+       table = new QTableWidget(this); // create the table
+       table->setColumnCount(4); // number of columns is always 4
 
-    // put the labels USD, EUR, GDP
-    QStringList first;
-    first << " "<<"USD"<<"EUR"<<"GBP";
-    table->setHorizontalHeaderLabels(first);
-    table->verticalHeader()->hide();
-    this->setCentralWidget(table);
-
-
-
-    for(int i=0;i<coinName.size();i++){
-        disconnect(this,0,0,0);
-        disconnect(manager,0,0,0);
-    connect(manager, SIGNAL(finished(QNetworkReply*)),this, SLOT(TableWidgetDisplay(QNetworkReply*)));
-    manager->get(QNetworkRequest(QUrl("https://api.coingecko.com/api/v3/simple/price?ids="+coinName[i]+"&vs_currencies=usd,eur,gbp")));
-}
+       // put the labels USD, EUR, GDP
+       QStringList first;
+       first << " "<<"USD"<<"EUR"<<"GBP";
+       table->setHorizontalHeaderLabels(first);
+       table->verticalHeader()->hide();
+       this->setCentralWidget(table);
 
 
+       connect(manager, SIGNAL(finished(QNetworkReply*)),this, SLOT(TableWidgetDisplay(QNetworkReply*)));
+       manager->get(QNetworkRequest(QUrl("https://api.coingecko.com/api/v3/simple/price?ids="+coinName[0]+"&vs_currencies=usd,eur,gbp")));
 
 
 }
@@ -78,7 +73,7 @@ void MainWindow::TableWidgetDisplay(QNetworkReply *reply){
     QString data = (QString) reply->readAll();
 
     // use pattern matching to extract the rate
-    QRegExp rx("\"usd\":(\\d+.?\\d*),\"eur\":(\\d+.?\\d*),\"gbp\":(\\d+.?\\d*)");
+   QRegExp rx("\"usd\":(\\d+.?\\d*),\"eur\":(\\d+.?\\d*),\"gbp\":(\\d+.?\\d*)..");
 
         QTableWidgetItem *item;
         QTableWidgetItem *coin;
@@ -104,13 +99,15 @@ void MainWindow::TableWidgetDisplay(QNetworkReply *reply){
             }
 
             else{
-                item->setText("Error"); // pattern could not be found.
+                item->setText(coinName[3]); // pattern could not be found.
             }
 
             table->setItem(row,column,item); // adds the table correspoding numerical value of USD,EUR or GDP value
 
         }
 
-    row++;
 
+
+    row++;
+    if(row<numberOfLines-1) manager->get(QNetworkRequest(QUrl("https://api.coingecko.com/api/v3/simple/price?ids="+coinName[row]+"&vs_currencies=usd,eur,gbp")));
 }
