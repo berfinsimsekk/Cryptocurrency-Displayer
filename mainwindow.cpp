@@ -24,21 +24,23 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     // reads the input file to know numberOfLines in the file.
-    QFile inputFile(path);
-
-    if (inputFile.open(QIODevice::ReadOnly))
-    {
-       QTextStream in(&inputFile);
-       QString line;
-
-       do {
-          line = in.readLine(); // the get current line.
+       QFile inputFile(path);
+       if (inputFile.open(QIODevice::ReadOnly))
+       {
+          QTextStream in(&inputFile);
+          while (!in.atEnd())
+          {
+             QString line = in.readLine(); // the get current line.
+             coinName.append(line); // add the name of the coin into string array
+             numberOfLines++; // increase the numberOfLines by 1
+          }
+          QString line = in.readLine(); // the get current line.
           coinName.append(line); // add the name of the coin into string array
           numberOfLines++; // increase the numberOfLines by 1
-       } while(!line.isNull());
-
 
        }
+
+
 
        inputFile.close();
 
