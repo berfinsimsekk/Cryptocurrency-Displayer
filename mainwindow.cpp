@@ -93,7 +93,7 @@ void MainWindow::getWholeList(QNetworkReply *reply){
        table->verticalHeader()->hide();
        this->setCentralWidget(table);
        this->centralWidget()->size();
-       this->resize((double)150.5*4,(double)45*numberOfLines); // 45*numberOfLines
+       this->resize((double)150.5*4,(double)45*numberOfLines); // resize the main window such that it fits the table.
        table->QAbstractItemView::setEditTriggers(QAbstractItemView::NoEditTriggers); // cell cannot be modified
        table->setFocusPolicy(Qt::NoFocus); // no blue highlight when cell clicked.
        //table->setStyleSheet("* { background-color: rgb(243, 243, 243); }");
