@@ -198,12 +198,7 @@ void MainWindow::TableWidgetDisplay(QNetworkReply *reply){
     row++;
     if(row<coinName.size()-1) {
         manager->get(QNetworkRequest(QUrl("https://api.coingecko.com/api/v3/simple/price?ids="+idOfcoinName[row]+"&vs_currencies=usd,eur,gbp")));
-    }else{
-        manager->deleteLater();
-        manager2->deleteLater();
-
     }
 
 }
-
 
