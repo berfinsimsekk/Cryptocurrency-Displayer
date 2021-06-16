@@ -80,8 +80,8 @@ void MainWindow::getWholeList(QNetworkReply *reply){
                            }
 
                            else{
-                               idOfcoinName.append(line); // appends the id of coin-name currency
-                               coinName.append(nameOfCoin); // coinName is added
+                               idOfcoinName.append("error"); // appends the id of coin-name currency
+                               coinName.append("error"); // coinName is added
                            }
                        }
 
@@ -89,7 +89,41 @@ void MainWindow::getWholeList(QNetworkReply *reply){
              numberOfLines++; // increase the numberOfLines by 1
           }
           QString line = in.readLine(); // the get current line.
-          coinName.append(line); // add the name of the coin into string array
+          QString pattern ="^(.+)\",\"symbol\":\"" +line+ "\",\"name\":\"(.+)\"\\},";
+
+                    QRegExp rx(pattern);
+                    rx.setMinimal(true); // for doing non-greedy matching.
+                    if ( rx.indexIn(WholeList, 0) != -1 ) { // the input is given as the symbol of the coin
+                        line=rx.cap(1); // rx.cap(1) is ^(.+)
+                        QStringList tempList=line.split("\""); // split the string with delimineter "
+                        line=tempList[tempList.size()-1]; // get the last element of the result, which is the id of coin
+                        idOfcoinName.append(line); // appends the id of coin-name currency
+                        coinName.append(rx.cap(2)); // rx.cap(2) is (.+)
+
+
+                    }
+
+                    else { // the input is given as the name of the coin.
+                        QString nameOfCoin=line;
+                        QString pattern2 ="^(.+)\",\"symbol\":\"(.+)\",\"name\":\""+line+"\"\\},";
+                        QRegExp rx2(pattern2);
+                        rx2.setMinimal(true);
+                        if ( rx2.indexIn(WholeList, 0) != -1 ) {
+                            line=rx2.cap(1);
+                            QStringList tempList=line.split("\""); // split the string with delimineter "
+                            line=tempList[tempList.size()-1]; // get the last element of the result, which is the id of coin
+                            idOfcoinName.append(line); // appends the id of coin-name currency
+                            coinName.append(nameOfCoin); // coinName is added
+
+
+                        }
+
+                        else{
+                            idOfcoinName.append("error"); // appends the id of coin-name currency
+                            coinName.append("error"); // coinName is added
+                        }
+                    }
+
           numberOfLines++; // increase the numberOfLines by 1
 
        }
