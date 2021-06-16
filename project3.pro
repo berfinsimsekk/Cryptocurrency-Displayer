@@ -1,3 +1,4 @@
+
 #-------------------------------------------------
 #
 # Project created by QtCreator 2021-06-15T11:18:24
@@ -34,3 +35,5 @@ HEADERS += \
 
 FORMS += \
         mainwindow.ui
+
+

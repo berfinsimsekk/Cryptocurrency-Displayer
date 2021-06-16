@@ -1,4 +1,3 @@
-#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QMainWindow>
@@ -26,6 +25,6 @@ public slots:
 private:
     Ui::MainWindow *ui;
     QNetworkAccessManager *manager ;
+    QNetworkAccessManager *manager2 ;
 };
 
-#endif // MAINWINDOW_H

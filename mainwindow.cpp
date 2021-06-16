@@ -21,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
 
-    QNetworkAccessManager* manager2=new QNetworkAccessManager(this);
+    manager2=new QNetworkAccessManager(this);
     connect(manager2, SIGNAL(finished(QNetworkReply*)),this, SLOT(getWholeList(QNetworkReply*)));
     manager2->get(QNetworkRequest(QUrl("https://api.coingecko.com/api/v3/coins/list")));
 
@@ -31,6 +31,8 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete manager;
+    delete manager2;
 }
 
 void MainWindow::getWholeList(QNetworkReply *reply){
@@ -143,9 +145,9 @@ void MainWindow::getWholeList(QNetworkReply *reply){
        table->verticalHeader()->hide();
        this->setCentralWidget(table);
        this->centralWidget()->size();
-       this->resize((double)150.5*4,(double)45*numberOfLines); // resize the main window such that it fits the table.
-       table->QAbstractItemView::setEditTriggers(QAbstractItemView::NoEditTriggers); // cell cannot be modified
-       table->setFocusPolicy(Qt::NoFocus); // no blue highlight when cell clicked.
+       //this->resize((double)150.5*4,(double)45*numberOfLines); // resize the main window such that it fits the table.
+       //table->QAbstractItemView::setEditTriggers(QAbstractItemView::NoEditTriggers); // cell cannot be modified
+       //table->setFocusPolicy(Qt::NoFocus); // no blue highlight when cell clicked.
        //table->setStyleSheet("* { background-color: rgb(243, 243, 243); }");
 
  connect(manager, SIGNAL(finished(QNetworkReply*)),this, SLOT(TableWidgetDisplay(QNetworkReply*)));
@@ -196,6 +198,12 @@ void MainWindow::TableWidgetDisplay(QNetworkReply *reply){
     row++;
     if(row<coinName.size()-1) {
         manager->get(QNetworkRequest(QUrl("https://api.coingecko.com/api/v3/simple/price?ids="+idOfcoinName[row]+"&vs_currencies=usd,eur,gbp")));
+    }else{
+        manager->deleteLater();
+        manager2->deleteLater();
+
     }
 
 }
+
+
