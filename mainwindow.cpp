@@ -6,10 +6,10 @@
 #include <QRegExp>
 #include <QFile>
 #include <QStringList>
-#include <QVariant>
 
 int numberOfLines=0;
 QStringList coinName; // tells the coinName index by index. For example, coinName[0] gives name of the coin at 0th row.
+QStringList idOfcoinName;
 QTableWidget *table;
 int row=0;
 QString WholeList;
@@ -49,17 +49,27 @@ void MainWindow::getWholeList(QNetworkReply *reply){
           while (!in.atEnd())
           {
              QString line = in.readLine(); // the get current line.
-             QString pattern = "\"symbol\":\"" +line+ "\",\"name\":\"(.+)\"\\},";
+
+             QString pattern ="^(.+)\",\"symbol\":\"" +line+ "\",\"name\":\"(.+)\"\\},";
 
                        QRegExp rx(pattern);
+                       rx.setMinimal(true); // for doing non-greedy matching.
                        if ( rx.indexIn(WholeList, 0) != -1 ) {
-                           line=rx.cap(1);
-                           line=line.split("\"")[0];
-                           line.replace(" ","-");
+                           line=rx.cap(1); // rx.cap(1) is ^(.+)
+                           QStringList tempList=line.split("\""); // split the string with delimineter "
+                           line=tempList[tempList.size()-1]; // get the last element of the result, which is the id of coin
+                           idOfcoinName.append(line); // appends the id of coin-name currency
+                           coinName.append(rx.cap(2)); // rx.cap(2) is (.+)
+
+
+                       }
+
+                       else {
+                            idOfcoinName.append(line); // add the id of the coin into string array
+                            coinName.append(line); // add the name of the coin into string array
                        }
 
 
-             coinName.append(line); // add the name of the coin into string array
              numberOfLines++; // increase the numberOfLines by 1
           }
           QString line = in.readLine(); // the get current line.
@@ -86,9 +96,10 @@ void MainWindow::getWholeList(QNetworkReply *reply){
        this->resize((double)150.5*4,(double)45*numberOfLines); // 45*numberOfLines
        table->QAbstractItemView::setEditTriggers(QAbstractItemView::NoEditTriggers); // cell cannot be modified
        table->setFocusPolicy(Qt::NoFocus); // no blue highlight when cell clicked.
+       //table->setStyleSheet("* { background-color: rgb(243, 243, 243); }");
 
  connect(manager, SIGNAL(finished(QNetworkReply*)),this, SLOT(TableWidgetDisplay(QNetworkReply*)));
- manager->get(QNetworkRequest(QUrl("https://api.coingecko.com/api/v3/simple/price?ids="+coinName[0]+"&vs_currencies=usd,eur,gbp")));
+ manager->get(QNetworkRequest(QUrl("https://api.coingecko.com/api/v3/simple/price?ids="+idOfcoinName[0]+"&vs_currencies=usd,eur,gbp")));
 }
 
 
@@ -124,7 +135,7 @@ void MainWindow::TableWidgetDisplay(QNetworkReply *reply){
             }
 
             else{
-                item->setText( QVariant(table->size().height()).toString() ); // pattern could not be found.
+                item->setText( "Error" ); // pattern could not be found.
             }
 
             table->setItem(row,column,item); // adds the table correspoding numerical value of USD,EUR or GDP value
@@ -134,7 +145,7 @@ void MainWindow::TableWidgetDisplay(QNetworkReply *reply){
 
     row++;
     if(row<coinName.size()-1) {
-        manager->get(QNetworkRequest(QUrl("https://api.coingecko.com/api/v3/simple/price?ids="+coinName[row]+"&vs_currencies=usd,eur,gbp")));
+        manager->get(QNetworkRequest(QUrl("https://api.coingecko.com/api/v3/simple/price?ids="+idOfcoinName[row]+"&vs_currencies=usd,eur,gbp")));
     }
 
 }
