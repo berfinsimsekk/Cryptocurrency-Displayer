@@ -187,7 +187,7 @@ void MainWindow::TableWidgetDisplay(QNetworkReply *reply){
             }
 
             else{
-                item->setText( "Error" ); // pattern could not be found.
+                item->setText( "" ); // pattern could not be found.
             }
 
             table->setItem(row,column,item); // adds the table correspoding numerical value of USD,EUR or GDP value
